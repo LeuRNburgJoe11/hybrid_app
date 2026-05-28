@@ -1,0 +1,24 @@
+name: hybrid_app
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  flutter_inappwebview: ^6.1.5
+  # The engine for video/audio streaming
+  flutter_webrtc: ^0.12.0 
+  
+  # The bridge for your JSP-based chatbot
+  webview_flutter: ^4.8.0
+
+  # For the signaling server (Socket communication)
+  socket_io_client: ^3.1.0
+  
+  # For granting camera/mic permissions at runtime
+  permission_handler: ^11.3.0
+  flutter_riverpod: ^3.3.1
+  
+  # for your REST API Service
+  http: ^1.2.0
+
+environment:
+  sdk: '^3.11.0'
