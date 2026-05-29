@@ -1,6 +1,8 @@
 <key>NSCameraUsageDescription</key>
-<string>We need access to your camera for the video call feature in the chatbot.</string>
+<string>$(hybrid_app) Camera Usage</string>
+
 <key>NSMicrophoneUsageDescription</key>
-<string>We need access to your microphone so you can speak with the voice chatbot.</string>
+<string>$(hybrid_app) Microphone Usage</string>
+
 <key>NSLocalNetworkUsageDescription</key>
-<string>Required for WebRTC local discovery and connection stability.</string> 
+<string>Required for WebRTC local discovery and connection stability.</string>
