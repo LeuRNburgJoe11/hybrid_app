@@ -1,14 +1,15 @@
 class AppConstants {
-  // Prevent instantiation of this class
   AppConstants._();
 
-  /// The base URL for your REST API control plane (JSP Chatbot orchestration)
-  /// For local development: 
-  /// - Use 'http://10.0.2.2:3000' if you are testing on an Android Emulator
-  /// - Use 'http://localhost:3000' if you are testing on iOS Simulator or Web
-  static const String baseUrl = 'http://10.0.2.2:3000';
+  // REST API control plane URL
+  static const String baseUrl = 'https://webrtc-backend-wtfl.onrender.com';
 
-  /// The WebSocket URL for your Socket.io signaling server
-  /// Matches the base URL port but uses the ws/wss protocol mapping
-  static const String signalingUrl = 'http://10.0.2.2:3000';
+  // BUG 2 FIX: Remove the /socket.io path suffix.
+  // socket_io_client appends /socket.io automatically. Having it here caused
+  // the client to connect to /socket.io/socket.io — a 404 — silently
+  // breaking all signalling so no offer/answer was ever exchanged.
+  // Pass baseUrl directly to IO.io(), not this constant.
+  // Kept here as an alias for clarity, but VideoView now uses baseUrl.
+  static const String signalingUrl = 'https://webrtc-backend-wtfl.onrender.com';
+  //                                  was: '...onrender.com/socket.io'  <-- BUG
 }
