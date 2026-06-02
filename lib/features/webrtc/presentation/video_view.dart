@@ -5,25 +5,38 @@ import 'package:hybrid_app/core/constants.dart';
 import 'package:hybrid_app/features/session/providers/session_provider.dart';
 import 'package:hybrid_app/features/webrtc/services/webrtc_service.dart';
 
-class VideoView extends ConsumerStatefulWidget {
-  const VideoView({Key? key}) : super(key: key);
+class VideoCallScreen extends StatefulWidget {
+  final WebRTCService rtcService;
+  const VideoCallScreen({Key? key, required this.rtcService}) : super(key: key);
 
   @override
-  ConsumerState<VideoView> createState() => _VideoViewState();
+  _VideoCallScreenState createState() => _VideoCallScreenState();
 }
 
-class _VideoViewState extends ConsumerState<VideoView> {
+class _VideoCallScreenState extends State<VideoCallScreen> {
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  bool _callStarted = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeRenderers();
+    _initRenderers();
+
+    // Hook into your WebRTCService streams so when a feed registers, the renderer displays it
+    widget.rtcService.onLocalStream = (stream) {
+      setState(() {
+        _localRenderer.srcObject = stream;
+      });
+    };
+
+    widget.rtcService.onRemoteStream = (stream) {
+      setState(() {
+        _remoteRenderer.srcObject = stream;
+      });
+    };
   }
 
-  Future<void> _initializeRenderers() async {
+  Future<void> _initRenderers() async {
     await _localRenderer.initialize();
     await _remoteRenderer.initialize();
   }
@@ -166,3 +179,21 @@ class _VideoViewState extends ConsumerState<VideoView> {
     );
   }
 }
+
+// Inside your video_view.dart widget build function
+StreamBuilder<bool>(
+  stream: ref.read(webrtcServiceProvider).isLocalSpeakingStream,
+  initialData: false,
+  builder: (context, snapshot) {
+    final isSpeaking = snapshot.data ?? false;
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: isSpeaking ? Colors.green : Colors.transparent, 
+          width: 3
+        ),
+      ),
+      child: Icon(isSpeaking ? Icons.mic : Icons.mic_off),
+    );
+  },
+);
