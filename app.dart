@@ -12,18 +12,21 @@ class _LiveSupportPageState extends State<LiveSupportPage> {
   final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   MediaStream? _localStream;
   RTCPeerConnection? _peerConnection;
+
   @override
   void initState() {
     super.initState();
     _initRenderers();
-   }
-}
-// Step 2 — CRITICAL: initialise before any use
-Future<void> _initRenderers() async {
-  await _localRenderer.initialize(); // <-- must not be skipped
-  await _remoteRenderer.initialize();
-  await _startLocalStream();
-}
+  }
+
+  // Step 2 — CRITICAL: initialise before any use
+  Future<void> _initRenderers() async {
+    await _localRenderer.initialize(); // <-- must not be skipped
+    await _remoteRenderer.initialize();
+    await _startLocalStream();
+    await _createPeerConnection();
+  }
+
 // Step 3 — Request camera/mic and assign to local renderer
 Future<void> _startLocalStream() async {
   final Map<String, dynamic> constraints = {
