@@ -1,4 +1,4 @@
-enum CallStatus { idle, connecting, connected, disconnected, error }
+enum CallStatus { idle, connecting, connected, disconnected, error, waiting }
 
 class CallState {
   final CallStatus status;
