@@ -1,19 +1,57 @@
+// lib/features/webrtc/providers/call_notifier.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hybrid_app/features/webrtc/models/call_state.dart';
+import 'package:hybrid_app/features/webrtc/services/webrtc_service.dart';
 
 class CallNotifier extends Notifier<CallState> {
   @override
   CallState build() {
-    // Initial state
     return CallState(status: CallStatus.idle);
   }
 
   void updateStatus(CallStatus newStatus, {String? error}) {
     state = state.copyWith(status: newStatus, errorMessage: error);
   }
+
+  /// Handles the response from your Chatbot's Invoke API Block
+  Future<void> handleChatbotEscalation({
+    required Map<String, dynamic> apiResponse,
+    required WebRTCService rtcService,
+  }) async {
+    try {
+      // 1. Parse the keys precisely as configured in your chatbot's response mapping layout
+      final String? statusField = apiResponse['status'];
+      final String? assignedRoomId = apiResponse['roomId'];
+
+      if (statusField == 'waiting' && assignedRoomId != null && assignedRoomId.isNotEmpty) {
+        // 2. Advance state to 'waiting' so the UI knows to show transition loader or video layout
+        state = state.copyWith(
+          status: CallStatus.waiting,
+          // Assuming your CallState model can store room/user variables:
+          // roomId: assignedRoomId, 
+        );
+
+        // 3. Fire the connection method on your live Render link
+        const String renderUrl = "https://hybrid-app-7z2v.onrender.com";
+        await rtcService.startVoiceCall(renderUrl, assignedRoomId);
+        
+      } else {
+        // Queue returned idle / no agents available
+        state = state.copyWith(
+          status: CallStatus.error,
+          errorMessage: "All support agents are currently busy.",
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        status: CallStatus.error,
+        errorMessage: "Failed to transition to live support agent: $e",
+      );
+    }
+  }
 }
 
 // The Provider that the UI will listen to
 final callProvider = NotifierProvider<CallNotifier, CallState>(() {
   return CallNotifier();
-});   
+});
