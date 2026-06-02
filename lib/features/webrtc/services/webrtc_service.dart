@@ -88,7 +88,7 @@ class WebRTCService {
         }
       };
 
-      _connectToSignaling(wsUrl, roomId);
+      _connectToSignaling(signalingUrl, roomId);
 
       final Map<String, dynamic> constraints = {
         'audio': true,
