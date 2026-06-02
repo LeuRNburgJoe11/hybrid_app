@@ -54,7 +54,7 @@ class WebRTCService {
     'sdpSemantics': 'unified-plan'
   };
 
-  Future<void> startVoiceCall(String wsUrl, String roomId) async {
+  Future<void> startVoiceCall(String signalingUrl, String roomId) async {
     ref.read(callProvider.notifier).updateStatus(CallStatus.connecting);
 
     try {
