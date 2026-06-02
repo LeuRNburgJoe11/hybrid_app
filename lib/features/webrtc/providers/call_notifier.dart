@@ -33,7 +33,7 @@ class CallNotifier extends Notifier<CallState> {
 
         // 3. Fire the connection method on your live Render link
         const String renderUrl = "https://hybrid-app-7z2v.onrender.com";
-        await rtcService.startVoiceCall(renderUrl, assignedRoomId);
+        await rtcService.startVoiceCall(renderUrl, assignedRoomId, {});
         
       } else {
         // Queue returned idle / no agents available
