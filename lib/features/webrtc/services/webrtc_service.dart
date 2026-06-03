@@ -61,7 +61,8 @@ class WebRTCService {
             'urls': turnUrls.isNotEmpty
                 ? turnUrls
                 : [
-                    'turn:turn.cloudflare.com:3478?transport=udp',
+                    'stun:stun.cloudflare.com:3478',
+                    'turn:turnv2.realtime.cloudflare.com:3478?transport=udp',
                     'turn:turn.cloudflare.com:3478?transport=tcp',
                     'turns:turn.cloudflare.com:5349?transport=tcp',
                   ],
