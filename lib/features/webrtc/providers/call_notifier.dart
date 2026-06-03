@@ -2,6 +2,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hybrid_app/features/webrtc/models/call_state.dart';
 import 'package:hybrid_app/features/webrtc/services/webrtc_service.dart';
+import 'package:hybrid_app/core/constants.dart';
 
 class CallNotifier extends Notifier<CallState> {
   @override
@@ -13,63 +14,83 @@ class CallNotifier extends Notifier<CallState> {
     state = state.copyWith(status: newStatus, errorMessage: error);
   }
 
-  /// Handles the response from your Chatbot's Invoke API Block
+  /// Handles the response from your Chatbot's Invoke API block.
+  ///
+  /// Expected [apiResponse] shape (matches server.js /api/handshake-escalation):
+  /// {
+  ///   "status":         "waiting",
+  ///   "roomId":         "room_abc123",
+  ///   "userId":         "user_xyz",
+  ///   "turnUrls":       ["turn:turn.cloudflare.com:3478?transport=udp", ...],
+  ///   "turnUsername":   "<ephemeral username>",
+  ///   "turnCredential": "<ephemeral credential>"
+  /// }
   Future<void> handleChatbotEscalation({
     required Map<String, dynamic> apiResponse,
     required WebRTCService rtcService,
   }) async {
     try {
-      // 1. Parse the keys precisely as configured in your chatbot's response mapping layout
-      final String? statusField = apiResponse['status'];
-      final String? assignedRoomId = apiResponse['roomId'];
+      final String? status = apiResponse['status'];
+      final String? roomId = apiResponse['roomId'];
 
-      if (statusField == 'waiting' && assignedRoomId != null && assignedRoomId.isNotEmpty) {
-        // 2. Advance state to 'waiting' so the UI knows to show transition loader or video layout
-        state = state.copyWith(
-          status: CallStatus.waiting,
-          // Assuming your CallState model can store room/user variables:
-          // roomId: assignedRoomId,
-        );
-
-        // 3. Extract Cloudflare / TURN credential payload from the chatbot response
-        final Map<String, dynamic>? iceData =
-            (apiResponse['cloudflare'] as Map<String, dynamic>?) ??
-            (apiResponse['iceConfig'] as Map<String, dynamic>?) ??
-            (apiResponse['turnServers'] as Map<String, dynamic>?) ??
-            (apiResponse['iceServers'] as Map<String, dynamic>?) ??
-            (apiResponse['urls'] != null && apiResponse['username'] != null && apiResponse['credential'] != null
-                ? Map<String, dynamic>.from(apiResponse)
-                : null);
-
-        if (iceData == null) {
-          state = state.copyWith(
-            status: CallStatus.error,
-            errorMessage: 'Missing ICE configuration from chatbot response.',
-          );
-          return;
-        }
-
-        // 4. Fire the connection method on your live Render link
-        const String renderUrl = "https://hybrid-app-7z2v.onrender.com";
-        await rtcService.startVoiceCall(renderUrl, assignedRoomId, iceData);
-
-      } else {
-        // Queue returned idle / no agents available
+      // FIX 1: Guard on both status and roomId before proceeding
+      if (status != 'waiting' || roomId == null || roomId.isEmpty) {
         state = state.copyWith(
           status: CallStatus.error,
-          errorMessage: "All support agents are currently busy.",
+          errorMessage: apiResponse['status'] == 'failed'
+              ? "Server failed to generate TURN credentials. Check Render logs."
+              : "All support agents are currently busy.",
         );
+        return;
       }
+
+      // FIX 2: Read flat TURN fields directly — matches the fixed server.js response.
+      // No more guessing between cloudflare / iceConfig / turnServers / iceServers keys.
+      final List<String> turnUrls = List<String>.from(
+        apiResponse['turnUrls'] ?? [],
+      );
+      final String turnUsername = apiResponse['turnUsername'] ?? '';
+      final String turnCredential = apiResponse['turnCredential'] ?? '';
+
+      // FIX 3: Validate credentials exist before starting the call
+      if (turnUsername.isEmpty || turnCredential.isEmpty) {
+        state = state.copyWith(
+          status: CallStatus.error,
+          errorMessage: 'Missing TURN credentials in server response.',
+        );
+        return;
+      }
+
+      // Advance state to waiting and store credentials so app.dart
+      // can read them from CallState to pass to VideoCallScreen.
+      state = state.copyWith(
+        status: CallStatus.waiting,
+        roomId: roomId,
+        turnUrls: turnUrls,
+        turnUsername: turnUsername,
+        turnCredential: turnCredential,
+      );
+
+      // FIX 4: Call startVoiceCall with named parameters matching the
+      // updated webrtc_service.dart signature — no more positional args
+      // or fragile Map<String, dynamic> ICE parsing.
+      await rtcService.startVoiceCall(
+        signalingUrl: AppConstants.signalingUrl,
+        roomId: roomId,
+        turnUrls: turnUrls,
+        turnUsername: turnUsername,
+        turnCredential: turnCredential,
+      );
+
     } catch (e) {
       state = state.copyWith(
         status: CallStatus.error,
-        errorMessage: "Failed to transition to live support agent: $e",
+        errorMessage: "Failed to connect to live support: $e",
       );
     }
   }
 }
 
-// The Provider that the UI will listen to
 final callProvider = NotifierProvider<CallNotifier, CallState>(() {
   return CallNotifier();
 });
