@@ -28,13 +28,31 @@ class CallNotifier extends Notifier<CallState> {
         state = state.copyWith(
           status: CallStatus.waiting,
           // Assuming your CallState model can store room/user variables:
-          // roomId: assignedRoomId, 
+          // roomId: assignedRoomId,
         );
 
-        // 3. Fire the connection method on your live Render link
+        // 3. Extract Cloudflare / TURN credential payload from the chatbot response
+        final Map<String, dynamic>? iceData =
+            (apiResponse['cloudflare'] as Map<String, dynamic>?) ??
+            (apiResponse['iceConfig'] as Map<String, dynamic>?) ??
+            (apiResponse['turnServers'] as Map<String, dynamic>?) ??
+            (apiResponse['iceServers'] as Map<String, dynamic>?) ??
+            (apiResponse['urls'] != null && apiResponse['username'] != null && apiResponse['credential'] != null
+                ? Map<String, dynamic>.from(apiResponse)
+                : null);
+
+        if (iceData == null) {
+          state = state.copyWith(
+            status: CallStatus.error,
+            errorMessage: 'Missing ICE configuration from chatbot response.',
+          );
+          return;
+        }
+
+        // 4. Fire the connection method on your live Render link
         const String renderUrl = "https://hybrid-app-7z2v.onrender.com";
-        await rtcService.startVoiceCall(renderUrl, assignedRoomId, {});
-        
+        await rtcService.startVoiceCall(renderUrl, assignedRoomId, iceData);
+
       } else {
         // Queue returned idle / no agents available
         state = state.copyWith(
