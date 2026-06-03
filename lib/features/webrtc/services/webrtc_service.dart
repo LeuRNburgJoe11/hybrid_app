@@ -29,37 +29,43 @@ class WebRTCService {
 
   WebRTCService(this.ref);
 
-  // PRODUCTION ICE CONFIGURATION: Feeds your STUN/TURN clusters into the native pair engine
-  final Map<String, dynamic> _iceConfig = {
-    'iceServers': [
-      {
-        'urls': [
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302',
-        ]
-      },
-      {
-        'urls': 'turn:your-turn-server-domain.com:3478', 
-        'username': 'your_service_auth_username',        
-        'credential': 'your_secret_security_password',   
-      },
-      {
-        'urls': 'turns:your-turn-server-domain.com:5349', 
-        'username': 'your_service_auth_username',
-        'credential': 'your_secret_security_password',
-      }
-    ],
-    // 'all' tells ICE to aggressively test both direct host pathways and relayed pathways
-    'iceTransportPolicy': 'all', 
-    'sdpSemantics': 'unified-plan'
-  };
+  // REMOVED: Static _iceConfig has been removed to allow dynamic runtime injection.
 
-  Future<void> startVoiceCall(String signalingUrl, String roomId) async {
+  /// Starts the voice call by dynamically compiling Cloudflare TURN tokens passed from the chatbot.
+  Future<void> startVoiceCall(
+    String signalingUrl, 
+    String roomId, 
+    Map<String, dynamic> cloudflareApiResponse,
+  ) async {
     ref.read(callProvider.notifier).updateStatus(CallStatus.connecting);
 
     try {
-      // The ICE Engine instantly instantiates with your candidate rules here
-      _peerConnection = await createPeerConnection(_iceConfig);
+      // 1. Build the dynamic ICE configuration map at runtime using Cloudflare's tokens
+      final Map<String, dynamic> dynamicIceConfig = {
+        'iceServers': [
+          // Baseline Google STUN servers for standard direct routing pathways
+          {
+            'urls': [
+              'stun:stun1.l.google.com:19302',
+              'stun:stun2.l.google.com:19302',
+            ]
+          },
+          // Dynamic Cloudflare TURN credentials injected from your Invoke API loop
+          {
+            'urls': cloudflareApiResponse['urls'] ?? [
+              'turn:turn.cloudflare.com:3478?transport=udp',
+              'turn:turn.cloudflare.com:3478?transport=tcp'
+            ], 
+            'username': cloudflareApiResponse['username'],        
+            'credential': cloudflareApiResponse['credential'],   
+          }
+        ],
+        'iceTransportPolicy': 'all', 
+        'sdpSemantics': 'unified-plan'
+      };
+
+      // 2. The ICE Engine instantly instantiates with your fresh candidate tokens here
+      _peerConnection = await createPeerConnection(dynamicIceConfig);
 
       _peerConnection!.onIceCandidate = (RTCIceCandidate candidate) {
         // ICE Algorithm found a local endpoint option! Send it through signaling instantly.
