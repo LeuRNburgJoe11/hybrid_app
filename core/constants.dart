@@ -1,14 +1,10 @@
 class AppConstants {
   AppConstants._();
-  // REST API control plane URL
-  //static const String baseUrl = 'https://webrtc-backend-wtfl.onrender.com';
 
-  // BUG 2 FIX: Remove the /socket.io path suffix.
-  // socket_io_client appends /socket.io automatically. Having it here caused
-  // the client to connect to /socket.io/socket.io — a 404 — silently
-  // breaking all signalling so no offer/answer was ever exchanged.
-  // Pass baseUrl directly to IO.io(), not this constant.
-  // Kept here as an alias for clarity, but VideoView now uses baseUrl.
-  static const String signalingUrl = "https://hybrid-app-7z2v.onrender.com";
-  //                                  was: '...onrender.com/socket.io'  <-- BUG
+  // Your Render.com signaling + REST API base URL.
+  // Do NOT append /socket.io — socket_io_client adds that automatically.
+  static const String baseUrl = "https://hybrid-app-7z2v.onrender.com";
+
+  // Alias used by WebRTCService for socket connection
+  static const String signalingUrl = baseUrl;
 }

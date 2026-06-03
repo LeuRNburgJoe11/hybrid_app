@@ -186,6 +186,15 @@ class WebRTCService {
     socket!.connect();
   }
 
+  /// Toggles audio mute. Returns the new muted state (true = muted).
+  bool toggleMute() {
+    final tracks = _localStream?.getAudioTracks();
+    if (tracks == null || tracks.isEmpty) return false;
+    final track = tracks.first;
+    track.enabled = !track.enabled;
+    return !track.enabled;
+  }
+
   Future<void> createOffer(String roomId) async {
     if (_peerConnection == null) return;
     final offer = await _peerConnection!.createOffer();
