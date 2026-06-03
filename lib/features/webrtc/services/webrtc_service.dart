@@ -23,6 +23,9 @@ class WebRTCService {
 
   Stream<bool> get isLocalSpeakingStream => _isLocalSpeakingController.stream;
   Stream<bool> get isRemoteSpeakingStream => _isRemoteSpeakingController.stream;
+  
+  /// Public getter for local media stream
+  MediaStream? get localStream => _localStream;
 
   bool _wasLocalSpeaking = false;
   bool _wasRemoteSpeaking = false;

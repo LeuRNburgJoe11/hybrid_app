@@ -71,10 +71,14 @@ class _VideoCallScreenState extends ConsumerState<VideoCallScreen> {
   }
 
   void _toggleMute() {
-    final nowMuted = widget.rtcService.toggleMute();
-    setState(() {
-      _isMuted = nowMuted;
-    });
+    final audioTracks = widget.rtcService.localStream?.getAudioTracks();
+    if (audioTracks != null && audioTracks.isNotEmpty) {
+      final track = audioTracks.first;
+      track.enabled = !track.enabled;
+      setState(() {
+        _isMuted = !track.enabled;
+      });
+    }
   }
 
   @override
