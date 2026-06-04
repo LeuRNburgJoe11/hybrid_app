@@ -4,7 +4,6 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hybrid_app/features/webrtc/providers/call_notifier.dart';
 import 'package:hybrid_app/features/webrtc/models/call_state.dart';
-import 'package:hybrid_app/features/session/providers/session_provider.dart';
 
 class WebRTCService {
   final Ref ref;
@@ -261,6 +260,7 @@ class WebRTCService {
 
       _localStream?.getTracks().forEach((track) => track.stop());
       await _localStream?.dispose();
+      await _remoteStream?.dispose();
       await _peerConnection?.dispose();
 
       socket?.emit('leave-room', {'reason': 'user_ended_call'});
@@ -275,7 +275,6 @@ class WebRTCService {
       onRemoteStream = null;
 
       ref.read(callProvider.notifier).updateStatus(CallStatus.disconnected);
-      ref.read(sessionProvider.notifier).resetSession();
     } catch (e) {
       ref.read(callProvider.notifier).updateStatus(
         CallStatus.error,

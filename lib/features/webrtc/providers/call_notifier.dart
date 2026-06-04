@@ -1,8 +1,6 @@
 // lib/features/webrtc/providers/call_notifier.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hybrid_app/features/webrtc/models/call_state.dart';
-import 'package:hybrid_app/features/webrtc/services/webrtc_service.dart';
-import 'package:hybrid_app/core/constants.dart';
 
 class CallNotifier extends Notifier<CallState> {
   @override
@@ -27,7 +25,6 @@ class CallNotifier extends Notifier<CallState> {
   /// }
   Future<void> handleChatbotEscalation({
     required Map<String, dynamic> apiResponse,
-    required WebRTCService rtcService,
   }) async {
     try {
       final String? status = apiResponse['status'];
@@ -71,16 +68,10 @@ class CallNotifier extends Notifier<CallState> {
         turnCredential: turnCredential,
       );
 
-      // FIX 4: Call startVoiceCall with named parameters matching the
-      // updated webrtc_service.dart signature — no more positional args
-      // or fragile Map<String, dynamic> ICE parsing.
-      await rtcService.startVoiceCall(
-        signalingUrl: AppConstants.signalingUrl,
-        roomId: roomId,
-        turnUrls: turnUrls,
-        turnUsername: turnUsername,
-        turnCredential: turnCredential,
-      );
+      // startVoiceCall() is intentionally NOT called here.
+      // VideoCallScreen._initCall() sets up onRemoteStream first, then calls it.
+      // Calling it here would create a peer connection before the screen exists,
+      // meaning onRemoteStream would never fire for the incoming track.
 
     } catch (e) {
       state = state.copyWith(
