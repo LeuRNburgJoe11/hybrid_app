@@ -98,10 +98,10 @@ class WelcomeScreen extends StatelessWidget {
               children: [
                 Image.asset(
                   'assets/images/hi_nxlink_logo.jpg',
-                  height: 36,
+                  height: 200,
                   fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 80),
                 Text(
                   'Redefine Customer\nExperience with NXLINK',
                   style: tt.displaySmall,
@@ -111,7 +111,7 @@ class WelcomeScreen extends StatelessWidget {
                   'A comprehensive CX platform integrating AI\nto revolutionize customer experiences.',
                   style: tt.bodyMedium,
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 60),
                 ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
@@ -246,9 +246,27 @@ class ChatbotShell extends StatelessWidget {
 </head>
 <body>
   <script>
+    // Step 1: Load the NXLink chatbot script
     const script = document.createElement('script');
     script.id = 'live-chat-script';
     script.src = 'https://nxlink.nxcloud.com/chatbot/client/js/live_chat.min.js?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOiIzMDE1IiwiYXVkIjoiVmlzaXRvciBDbGllbnQiLCJjb25maWdfaWQiOiIxNCIsIm5hbWUiOiJMaXZlIENoYXQiLCJpc3MiOiJueGFpLmNvbSIsImV4cCI6NDgyNzU2MTM3MSwiaWF0IjoxNzUxNzIxMzcxfQ.KaZg8EiYf8IW0tubuAufaQ7UZaExpzprDVwiylCltSw&vtime=' + new Date().getTime();
+
+    // Step 2: Once script loads, wait 1.5s then auto-open the chat window
+    script.onload = function() {
+      setTimeout(function() {
+        // Try the NXLink public API first
+        if (window.NXLiveChat && typeof window.NXLiveChat.open === 'function') {
+          window.NXLiveChat.open();
+          return;
+        }
+        // Fallback: click whatever button the widget rendered
+        const btn = document.querySelector(
+          'button, [role="button"], [class*="chat"], [class*="launcher"], [class*="trigger"], [id*="chat"]'
+        );
+        if (btn) btn.click();
+      }, 1500);
+    };
+
     document.head.appendChild(script);
   </script>
 </body>
@@ -319,30 +337,3 @@ class _FeatureTile extends StatelessWidget {
   }
 }
 
-class _StatChip extends StatelessWidget {
-  final String value;
-  final String label;
-  const _StatChip({required this.value, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            )),
-        const SizedBox(height: 4),
-        Text(label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white70,
-              fontSize: 11,
-              height: 1.4,
-            )),
-      ],
-    );
-  }
-}
