@@ -24,8 +24,18 @@ class ChatbotShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
+    return Scaffold(
+      appBar: AppBar(
+        title: Image.asset(
+          'assets/images/nxlink_logo.png',
+          height: 32,
+          fit: BoxFit.contain,
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 1,
+      ),
+      body: const Center(
         child: Text(
           'Chatbot loads here',
           style: TextStyle(color: Colors.black54),

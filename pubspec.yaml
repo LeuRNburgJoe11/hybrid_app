@@ -20,5 +20,10 @@ dependencies:
   # for your REST API Service
   http: ^1.2.0
 
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/nxlink_logo.png
+
 environment:
   sdk: '^3.11.0'
