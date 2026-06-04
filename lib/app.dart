@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 // ── NXLink brand tokens ───────────────────────────────────────────────────────
 const _kGreen = Color(0xFF6BBF4E);
@@ -229,12 +230,39 @@ class ChatbotShell extends StatelessWidget {
             ),
           ),
 
-          // Chatbot WebView goes here
-          const Expanded(
-            child: Center(
-              child: Text(
-                'Chatbot loads here',
-                style: TextStyle(color: Colors.black38),
+          // NXLink chatbot WebView
+          Expanded(
+            child: InAppWebView(
+              initialData: InAppWebViewInitialData(
+                data: '''
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #ffffff; }
+  </style>
+</head>
+<body>
+  <script>
+    const script = document.createElement('script');
+    script.id = 'live-chat-script';
+    script.src = 'https://nxlink.nxcloud.com/chatbot/client/js/live_chat.min.js?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOiIzMDE1IiwiYXVkIjoiVmlzaXRvciBDbGllbnQiLCJjb25maWdfaWQiOiIxNCIsIm5hbWUiOiJMaXZlIENoYXQiLCJpc3MiOiJueGFpLmNvbSIsImV4cCI6NDgyNzU2MTM3MSwiaWF0IjoxNzUxNzIxMzcxfQ.KaZg8EiYf8IW0tubuAufaQ7UZaExpzprDVwiylCltSw&vtime=' + new Date().getTime();
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>
+''',
+                mimeType: 'text/html',
+                encoding: 'utf-8',
+              ),
+              initialSettings: InAppWebViewSettings(
+                javaScriptEnabled: true,
+                mediaPlaybackRequiresUserGesture: false,
+                allowsInlineMediaPlayback: true,
+                useOnLoadResource: true,
+                useShouldOverrideUrlLoading: true,
               ),
             ),
           ),
