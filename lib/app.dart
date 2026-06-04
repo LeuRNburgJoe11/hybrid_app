@@ -87,16 +87,16 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: Column(
         children: [
-          // ── Hero banner (mirrors the green-tinted top block on the website) ──
+          // ── Hero banner ───────────────────────────────────────────────────
           Container(
             width: double.infinity,
-            color: _kGreenLight,
+            color: Colors.white,
             padding: const EdgeInsets.only(top: 64, bottom: 40, left: 28, right: 28),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Image.asset(
-                  'assets/images/nxlink_logo_white.png',
+                  'assets/images/hi_nxlink_logo.jpg',
                   height: 36,
                   fit: BoxFit.contain,
                 ),
@@ -126,6 +126,8 @@ class WelcomeScreen extends StatelessWidget {
 
           // ── Feature highlights ─────────────────────────────────────────────
           Expanded(
+            child: Container(
+              color: _kGreenLight,
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
@@ -166,6 +168,7 @@ class WelcomeScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                 ],
               ),
+            ),
             ),
           ),
         ],

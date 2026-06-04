@@ -25,6 +25,7 @@ flutter:
   assets:
     - assets/images/nxlink_logo.png
     - assets/images/nxlink_logo_white.png
+    - assets/images/hi_nxlink_logo.jpg
 
 environment:
   sdk: '^3.11.0'
