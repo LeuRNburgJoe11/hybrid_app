@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
+// ── NXLink chatbot config — swap JWT here to change the chatbot ──────────────
+const _kChatbotJwt =
+    'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOiIzMDE1IiwiYXVkIjoiVmlzaXRvciBDbGllbnQiLCJjb25maWdfaWQiOiIxNCIsIm5hbWUiOiJMaXZlIENoYXQiLCJpc3MiOiJueGFpLmNvbSIsImV4cCI6NDgyNzU2MTM3MSwiaWF0IjoxNzUxNzIxMzcxfQ.KaZg8EiYf8IW0tubuAufaQ7UZaExpzprDVwiylCltSw';
+
 // ── NXLink brand tokens ───────────────────────────────────────────────────────
 const _kGreen = Color(0xFF6BBF4E);
 const _kGreenDark = Color(0xFF3B6B35);
@@ -247,7 +251,7 @@ class ChatbotShell extends StatelessWidget {
   <script>
     const script = document.createElement('script');
     script.id = 'live-chat-script';
-    script.src = 'https://nxlink.nxcloud.com/chatbot/client/js/live_chat.min.js?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOiIzMDE1IiwiYXVkIjoiVmlzaXRvciBDbGllbnQiLCJjb25maWdfaWQiOiIxNCIsIm5hbWUiOiJMaXZlIENoYXQiLCJpc3MiOiJueGFpLmNvbSIsImV4cCI6NDgyNzU2MTM3MSwiaWF0IjoxNzUxNzIxMzcxfQ.KaZg8EiYf8IW0tubuAufaQ7UZaExpzprDVwiylCltSw&vtime=' + new Date().getTime();
+    script.src = 'https://nxlink.nxcloud.com/chatbot/client/js/live_chat.min.js?jwt=$_kChatbotJwt&vtime=' + new Date().getTime();
     script.onload = function() {
       setTimeout(function() {
         if (window.NXLiveChat && typeof window.NXLiveChat.open === 'function') {
