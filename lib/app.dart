@@ -229,9 +229,7 @@ class ChatbotShell extends StatelessWidget {
             ),
           ),
 
-          // NXLink chatbot — script injected into a blank HTML page.
-          // On Android/iOS this runs in a full native WebView (fully interactive).
-          // Chrome/web testing has iframe nesting limits — use a real device for full testing.
+          // NXLink chatbot WebView
           Expanded(
             child: InAppWebView(
               initialData: InAppWebViewInitialData(
@@ -264,11 +262,19 @@ class ChatbotShell extends StatelessWidget {
 ''',
                 mimeType: 'text/html',
                 encoding: 'utf-8',
+                // Give the page a real domain so NXLink's domain whitelist check passes
+                baseUrl: WebUri('https://nxlink.nxcloud.com'),
               ),
               initialSettings: InAppWebViewSettings(
                 javaScriptEnabled: true,
                 mediaPlaybackRequiresUserGesture: false,
                 allowsInlineMediaPlayback: true,
+                // Android-specific settings needed for chat widgets
+                domStorageEnabled: true,
+                databaseEnabled: true,
+                supportZoom: false,
+                useWideViewPort: true,
+                loadWithOverviewMode: true,
               ),
             ),
           ),
