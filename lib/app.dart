@@ -86,50 +86,52 @@ class WelcomeScreen extends StatelessWidget {
     final tt = Theme.of(context).textTheme;
 
     return Scaffold(
-      body: Column(
-        children: [
-          // ── Hero banner ───────────────────────────────────────────────────
-          Container(
-            width: double.infinity,
-            color: Colors.white,
-            padding: const EdgeInsets.only(top: 64, bottom: 40, left: 28, right: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Image.asset(
-                  'assets/images/hi_nxlink_logo.jpg',
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
-                const SizedBox(height: 80),
-                Text(
-                  'Redefine Customer\nExperience with NXLINK',
-                  style: tt.displaySmall,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'A comprehensive CX platform integrating AI\nto revolutionize customer experiences.',
-                  style: tt.bodyMedium,
-                ),
-                const SizedBox(height: 60),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const ChatbotShell()),
-                    );
-                  },
-                  icon: const Icon(Icons.chat_bubble_outline, size: 18),
-                  label: const Text('Start Chat'),
-                ),
-              ],
+      // FIX 1: Wrap everything in one SingleChildScrollView so the
+      // entire page scrolls as a unit — not just the bottom half.
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // ── Hero banner ─────────────────────────────────────────────────
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.only(top: 64, bottom: 40, left: 28, right: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.asset(
+                    'assets/images/hi_nxlink_logo.jpg',
+                    height: 200,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 80),
+                  Text(
+                    'Redefine Customer\nExperience with NXLINK',
+                    style: tt.displaySmall,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'A comprehensive CX platform integrating AI\nto revolutionize customer experiences.',
+                    style: tt.bodyMedium,
+                  ),
+                  const SizedBox(height: 60),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const ChatbotShell()),
+                      );
+                    },
+                    icon: const Icon(Icons.chat_bubble_outline, size: 18),
+                    label: const Text('Start Chat'),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // ── Feature highlights ─────────────────────────────────────────────
-          Expanded(
-            child: Container(
+            // ── Feature highlights ───────────────────────────────────────────
+            Container(
+              width: double.infinity,
               color: _kGreenLight,
-            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -156,8 +158,6 @@ class WelcomeScreen extends StatelessWidget {
                     title: 'Conversational AI Assistant',
                     body: 'Intelligent self-service powered by large language models, available 24/7.',
                   ),
-                  const SizedBox(height: 8),
-
                   const SizedBox(height: 32),
                   Center(
                     child: Text(
@@ -170,9 +170,8 @@ class WelcomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -230,7 +229,9 @@ class ChatbotShell extends StatelessWidget {
             ),
           ),
 
-          // NXLink chatbot WebView
+          // NXLink chatbot — script injected into a blank HTML page.
+          // On Android/iOS this runs in a full native WebView (fully interactive).
+          // Chrome/web testing has iframe nesting limits — use a real device for full testing.
           Expanded(
             child: InAppWebView(
               initialData: InAppWebViewInitialData(
@@ -246,27 +247,16 @@ class ChatbotShell extends StatelessWidget {
 </head>
 <body>
   <script>
-    // Step 1: Load the NXLink chatbot script
     const script = document.createElement('script');
     script.id = 'live-chat-script';
     script.src = 'https://nxlink.nxcloud.com/chatbot/client/js/live_chat.min.js?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0ZW5hbnRfaWQiOiIzMDE1IiwiYXVkIjoiVmlzaXRvciBDbGllbnQiLCJjb25maWdfaWQiOiIxNCIsIm5hbWUiOiJMaXZlIENoYXQiLCJpc3MiOiJueGFpLmNvbSIsImV4cCI6NDgyNzU2MTM3MSwiaWF0IjoxNzUxNzIxMzcxfQ.KaZg8EiYf8IW0tubuAufaQ7UZaExpzprDVwiylCltSw&vtime=' + new Date().getTime();
-
-    // Step 2: Once script loads, wait 1.5s then auto-open the chat window
     script.onload = function() {
       setTimeout(function() {
-        // Try the NXLink public API first
         if (window.NXLiveChat && typeof window.NXLiveChat.open === 'function') {
           window.NXLiveChat.open();
-          return;
         }
-        // Fallback: click whatever button the widget rendered
-        const btn = document.querySelector(
-          'button, [role="button"], [class*="chat"], [class*="launcher"], [class*="trigger"], [id*="chat"]'
-        );
-        if (btn) btn.click();
       }, 1500);
     };
-
     document.head.appendChild(script);
   </script>
 </body>
@@ -279,8 +269,6 @@ class ChatbotShell extends StatelessWidget {
                 javaScriptEnabled: true,
                 mediaPlaybackRequiresUserGesture: false,
                 allowsInlineMediaPlayback: true,
-                useOnLoadResource: true,
-                useShouldOverrideUrlLoading: true,
               ),
             ),
           ),
